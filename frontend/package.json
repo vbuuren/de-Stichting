@@ -1,0 +1,22 @@
+{
+  "name": "destichting-frontend",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build --base /",
+    "preview": "vite preview --port 5173"
+  },
+  "dependencies": {
+    "axios": "^1.6.8",
+    "jwt-decode": "^4.0.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-router-dom": "^6.23.1"
+  },
+  "devDependencies": {
+    "vite": "^5.3.1",
+    "@vitejs/plugin-react": "^4.0.0"
+  }
+}

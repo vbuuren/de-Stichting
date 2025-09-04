@@ -1,0 +1,144 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  USER
+}
+
+enum ParticipationStatus {
+  GOING
+  CANCELED
+}
+
+model User {
+  id                 Int       @id @default(autoincrement())
+  username           String    @unique
+  firstName          String
+  tussenvoegsel      String?   // Infix like 'van', 'de'
+  lastName           String
+  phone              String?
+  passwordHash       String
+  role               Role      @default(USER)
+  mustChangePassword Boolean   @default(true)
+  specialNotes       String?   // bijzonderheden (allergies, etc.)
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  uploads            Upload[]
+  participating      UitjeParticipant[]
+}
+
+model Upload {
+  id          Int      @id @default(autoincrement())
+  user        User?    @relation(fields: [userId], references: [id])
+  userId      Int?
+  uitje       Uitje?   @relation(fields: [uitjeId], references: [id])
+  uitjeId     Int?
+  path        String
+  original    String
+  mimetype    String
+  size        Int
+  createdAt   DateTime @default(now())
+}
+
+model Uitje {
+  id                Int       @id @default(autoincrement())
+  date              DateTime
+  title             String
+  description       String?
+  collectPoint      String?   // verzamelpunt
+  collectTime       String?   // simple HH:mm
+  registrationUntil DateTime? // inschrijven tot
+  cancelUntil       DateTime? // annuleren tot
+  published         Boolean   @default(false) // published to frontend
+  showOnFrontend    Boolean   @default(false) // "publiceer"
+  mapsUrl           String?
+  termsUrl          String?
+  googleAlbumUrl    String?
+  imageUrl          String?
+
+  events            Event[]
+  meals             Meal[]
+  travels           Travel[]
+  participants      UitjeParticipant[]
+  uploads           Upload[]
+
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+}
+
+model Event {
+  id        Int      @id @default(autoincrement())
+  uitje     Uitje    @relation(fields: [uitjeId], references: [id], onDelete: Cascade)
+  uitjeId   Int
+  title     String
+  startTime String?
+  endTime   String?
+  pricePP   Float?   // bedrag per persoon
+  priceTot  Float?   // totaalbedrag (bijv. groepsprijs)
+  notes     String?
+  order     Int      @default(0)
+}
+
+model Meal {
+  id        Int      @id @default(autoincrement())
+  uitje     Uitje    @relation(fields: [uitjeId], references: [id], onDelete: Cascade)
+  uitjeId   Int
+  title     String
+  startTime String?
+  endTime   String?
+  notes     String?
+  order     Int      @default(0)
+}
+
+model Travel {
+  id        Int      @id @default(autoincrement())
+  uitje     Uitje    @relation(fields: [uitjeId], references: [id], onDelete: Cascade)
+  uitjeId   Int
+  title     String
+  startTime String?
+  endTime   String?
+  from      String?
+  to        String?
+  mode      String? // car, train, walk ...
+  notes     String?
+  order     Int      @default(0)
+}
+
+model UitjeParticipant {
+  id        Int       @id @default(autoincrement())
+  uitje     Uitje     @relation(fields: [uitjeId], references: [id], onDelete: Cascade)
+  uitjeId   Int
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    Int
+  status    ParticipationStatus @default(GOING)
+  canCancel Boolean   @default(true) // cancel allowed once; admin can reset
+  prepaid   Boolean   @default(false)
+  postpaid  Boolean   @default(false)
+  createdAt DateTime  @default(now())
+
+  @@unique([uitjeId, userId])
+}
+
+model Setting {
+  id             Int     @id @default(autoincrement())
+  siteTitle      String  @default("de Stichting")
+  smtpHost       String?
+  smtpPort       Int?
+  smtpUser       String?
+  smtpPass       String?
+  smtpFrom       String?
+  welcomeText    String? // frontpage
+  defaultTexts   String? // json blob
+  logoUrl        String?
+  frontImageUrl  String?
+  updatedAt      DateTime @updatedAt
+  createdAt      DateTime @default(now())
+}

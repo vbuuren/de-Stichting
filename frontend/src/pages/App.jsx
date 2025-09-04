@@ -1,0 +1,6 @@
+import React, { useEffect, useState } from 'react';
+import { Routes, Route, Link, useNavigate } from 'react-router-dom';
+import Login from './Login';
+function useAuth(){ const [token,setToken]=useState(localStorage.getItem('token')); const [me,setMe]=useState(null); useEffect(()=>{ if(token){ fetch('/api/auth/me',{ headers:{ Authorization:`Bearer ${token}` } }).then(r=>r.json()).then(setMe).catch(()=>setMe(null)) } },[token]); return { token,setToken,me,setMe } }
+export default function App(){ const { token,setToken,me } = useAuth(); const navigate=useNavigate(); const logout=()=>{ localStorage.removeItem('token'); navigate('/'); window.location.reload() }
+ return (<div style={{maxWidth:1100,margin:'0 auto',padding:16}}><header style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}><h1>de Stichting</h1><nav><Link to='/'>Uitjes</Link>{me?.role==='ADMIN' && <Link style={{marginLeft:8}} to='/admin'>Admin</Link>}{token ? <button style={{marginLeft:8}} onClick={logout}>Uitloggen</button> : <Link style={{marginLeft:8}} to='/login'>Inloggen</Link>}</nav></header><Routes><Route path='/' element={<div>Welkom</div>} /><Route path='/login' element={<Login onLogin={(t)=>{localStorage.setItem('token',t); window.location.href='/'}} />} /><Route path='/admin' element={<div>Admin area - requires role check</div>} /></Routes></div>) }
