@@ -46,8 +46,8 @@ echo "==> Node version: $(node -v)"
 echo "==> NPM version: $(npm -v)"
 
 # Sync files from current folder to $APP_DIR (assumes you ran this script from repository root)
-echo "==> Syncing repository files to $APP_DIR"
-sudo rsync -a --delete ./ "$APP_DIR/"
+# echo "==> Syncing repository files to $APP_DIR"
+# sudo rsync -a --delete ./ "$APP_DIR/"
 
 # Backend install
 echo "==> Installing backend dependencies (including devDeps for Prisma)"
